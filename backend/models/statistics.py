@@ -1,22 +1,21 @@
 """
-نموذج الإحصائيات
+نموذج الإحصائيات المحسّن
+
+يوفر إحصائيات شاملة للمشروع بما في ذلك الجدران والصعوبة
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Statistics:
     """
     إحصائيات شاملة للمشروع
-    
-    Attributes:
-        total_measurements: إجمالي القياسات
-        total_calculations: إجمالي الحسابات
-        session_start: وقت بدء الجلسة
-        last_update: آخر تحديث
     """
     
     total_measurements: int = 0
@@ -53,10 +52,14 @@ class Statistics:
             'total_shots_attempted': self.total_shots_attempted,
             'total_shots_successful': self.total_shots_successful,
             'average_difficulty': self.average_difficulty,
-            'success_rate': self.success_rate,
-            'session_duration': self.session_duration,
+            'success_rate': round(self.success_rate, 2),
+            'session_duration': round(self.session_duration, 2),
             'session_start': self.session_start.isoformat(),
             'last_update': self.last_update.isoformat(),
             'stats_by_rails': self.stats_by_rails,
             'stats_by_difficulty': self.stats_by_difficulty,
         }
+    
+    def update_last_modified(self) -> None:
+        """تحديث وقت آخر تعديل"""
+        self.last_update = datetime.now()
