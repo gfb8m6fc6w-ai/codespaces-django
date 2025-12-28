@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تسجيل قياسات البلياردو</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-add {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-add:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-clear {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+        
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: right;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.95em;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        tbody tr.editing {
+            background: #e3f2fd;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state small {
+            color: #bdc3c7;
+        }
+        
+        .formula {
+            background: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .alert.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        .info-box {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #95a5a6;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid,
+            .filters,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            th, td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-delete,
+            .btn-edit {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎱 نظام تسجيل قياسات البلياردو</h1>
+            <p>أدارة وحفظ قياسات اللعبات - المعادلة: موقع الهدف + موقع الكرة البيضاء = قياس العصا</p>
+        </div>
+        
+        <div class="content">
+            <!-- الرسالة التنبيهية -->
+            <div id="alert" class="alert"></div>
+            
+            <!-- المعادلة الأساسية -->
+            <div class="formula">
+                🎯 المعادلة الأساسية: موقع الهدف + موقع الكرة البيضاء = قياس العصا
+            </div>
+            
+            <!-- معلومة -->
+            <div class="info-box">
+                💡 أدخل القياسات اليدوية التي جمعتها خلال خبرتك - يتم حفظ جميع البيانات تلقائياً في جهازك
+            </div>
+            
+            <!-- قسم الإدخال -->
+            <div class="input-section">
+                <h2 style="margin-bottom: 20px; color: #333;">➕ إضافة قياسة جديدة</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="rails">عدد الجدران:</label>
+                        <select id="rails">
+                            <option value="">اختر عدد الجدران</option>
+                            <option value="1">جدار واحد</option>
+                            <option value="2">جدارين</option>
+                            <option value="3">ثلاثة جدران</option>
+                            <option value="4">أربعة جدران</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="whiteBall">موقع الكرة البيضاء:</label>
+                        <input type="number" id="whiteBall" placeholder="مثال: 2.5" step="0.1" min="0" max="8">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="target">موقع الهدف:</label>
+                        <input type="number" id="target" placeholder="مثال: 3.5" step="0.1" min="0" max="8">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cue">قياس العصا (نتيجة):</label>
+                        <input type="number" id="cue" placeholder="مثال: 6" step="0.1" min="0" max="20">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">ملاحظات:</label>
+                        <input type="text" id="notes" placeholder="اختياري - اكتب أي ملاحظة">
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-add" onclick="addMeasurement()">➕ إضافة القياسة</button>
+                    <button class="btn-clear" onclick="clearForm()">🔄 مسح النموذج</button>
+                </div>
+            </div>
+            
+            <!-- قسم البحث والتصفية -->
+            <h3 style="margin-bottom: 15px; color: #333;">🔍 البحث والتصفية</h3>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filterRails">تصفية حسب الجدران:</label>
+                    <select id="filterRails" onchange="filterData()">
+                        <option value="">الكل</option>
+                        <option value="1">جدار واحد</option>
+                        <option value="2">جدارين</option>
+                        <option value="3">ثلاثة جدران</option>
+                        <option value="4">أربعة جدران</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="searchBox">بحث في الملاحظات:</label>
+                    <input type="text" id="searchBox" placeholder="اكتب للبحث..." onkeyup="filterData()">
+                </div>
+            </div>
+            
+            <!-- الإحصائيات -->
+            <h3 style="margin-bottom: 15px; color: #333;">📊 الإحصائيات</h3>
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>إجمالي القياسات</h3>
+                    <div class="value" id="totalCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>جدار واحد</h3>
+                    <div class="value" id="oneRailCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>جدارين</h3>
+                    <div class="value" id="twoRailCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>ثلاثة جدران</h3>
+                    <div class="value" id="threeRailCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>أربعة جدران</h3>
+                    <div class="value" id="fourRailCount">0</div>
+                </div>
+            </div>
+            
+            <!-- الجدول -->
+            <h3 style="margin-bottom: 15px; color: #333;">📋 جدول القياسات</h3>
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الجدران</th>
+                            <th>الكرة البيضاء</th>
+                            <th>الهدف</th>
+                            <th>العصا</th>
+                            <th>التحقق</th>
+                            <th>الملاحظات</th>
+                            <th>التاريخ</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- البيانات سيتم إدراجها هنا -->
+                    </tbody>
+                </table>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <p>لا توجد قياسات مسجلة حالياً</p>
+                    <small>ابدأ بإضافة قياسة جديدة من القسم أعلاه</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>جميع البيانات تُحفظ تلقائياً في جهازك • 📅 آخر تحديث: <span id="lastUpdate">الآن</span></p>
+        </div>
+    </div>
+
+    <script>
+        // متغيرات النظام
+        let measurements = [];
+        let editingId = null;
+
+        // حفظ واسترجاع من localStorage
+        const STORAGE_KEY = 'billiardsDatabase';
+
+        // تحميل البيانات عند بدء الصفحة
+        window.addEventListener('load', () => {
+            loadData();
+            updateStats();
+            renderTable();
+        });
+
+        // حفظ البيانات في localStorage
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(measurements));
+            updateLastUpdate();
+        }
+
+        // تحميل البيانات من localStorage
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            measurements = saved ? JSON.parse(saved) : [];
+        }
+
+        // إضافة قياسة جديدة
+        function addMeasurement() {
+            const rails = document.getElementById('rails').value;
+            const whiteBall = parseFloat(document.getElementById('whiteBall').value);
+            const target = parseFloat(document.getElementById('target').value);
+            const cue = parseFloat(document.getElementById('cue').value);
+            const notes = document.getElementById('notes').value;
+
+            // التحقق من البيانات
+            if (!rails || isNaN(whiteBall) || isNaN(target) || isNaN(cue)) {
+                showAlert('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+
+            // التحقق من الصيغة
+            const expectedCue = whiteBall + target;
+            const tolerance = 0.1; // تسامح بـ 0.1
+            const isCorrect = Math.abs(cue - expectedCue) <= tolerance;
+
+            const measurement = {
+                id: editingId || Date.now(),
+                rails: parseInt(rails),
+                whiteBall,
+                target,
+                cue,
+                expectedCue: parseFloat(expectedCue.toFixed(1)),
+                isCorrect,
+                notes,
+                date: new Date().toLocaleDateString('ar-SA'),
+                time: new Date().toLocaleTimeString('ar-SA')
+            };
+
+            // تحديث أو إضافة
+            if (editingId) {
+                const index = measurements.findIndex(m => m.id === editingId);
+                measurements[index] = measurement;
+                showAlert('تم تحديث القياسة بنجاح ✅', 'success');
+                editingId = null;
+            } else {
+                measurements.unshift(measurement);
+                showAlert('تم إضافة القياسة بنجاح ✅', 'success');
+            }
+
+            saveData();
+            updateStats();
+            renderTable();
+            clearForm();
+        }
+
+        // تعديل قياسة
+        function editMeasurement(id) {
+            const measurement = measurements.find(m => m.id === id);
+            if (measurement) {
+                document.getElementById('rails').value = measurement.rails;
+                document.getElementById('whiteBall').value = measurement.whiteBall;
+                document.getElementById('target').value = measurement.target;
+                document.getElementById('cue').value = measurement.cue;
+                document.getElementById('notes').value = measurement.notes;
+                editingId = id;
+
+                // تمييز الصف
+                document.querySelectorAll('tbody tr').forEach(row => {
+                    row.classList.remove('editing');
+                });
+                document.querySelector(`tr[data-id="${id}"]`).classList.add('editing');
+
+                // الذهاب إلى أعلى الصفحة
+                document.querySelector('.input-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // حذف قياسة
+        function deleteMeasurement(id) {
+            if (confirm('هل أنت متأكد من حذف هذه القياسة؟')) {
+                measurements = measurements.filter(m => m.id !== id);
+                saveData();
+                updateStats();
+                renderTable();
+                showAlert('تم حذف القياسة بنجاح ✅', 'success');
+            }
+        }
+
+        // مسح النموذج
+        function clearForm() {
+            document.getElementById('rails').value = '';
+            document.getElementById('whiteBall').value = '';
+            document.getElementById('target').value = '';
+            document.getElementById('cue').value = '';
+            document.getElementById('notes').value = '';
+            editingId = null;
+
+            // إزالة التمييز
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.classList.remove('editing');
+            });
+        }
+
+        // تصفية البيانات
+        function filterData() {
+            const filterRails = document.getElementById('filterRails').value;
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            const filtered = measurements.filter(m => {
+                const railsMatch = !filterRails || m.rails.toString() === filterRails;
+                const searchMatch = !searchTerm || m.notes.toLowerCase().includes(searchTerm);
+                return railsMatch && searchMatch;
+            });
+
+            renderTable(filtered);
+        }
+
+        // رسم الجدول
+        function renderTable(data = measurements) {
+            const tbody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            tbody.innerHTML = data.map((m, index) => `
+                <tr data-id="${m.id}">
+                    <td>${index + 1}</td>
+                    <td><strong>${m.rails}</strong></td>
+                    <td>${m.whiteBall}</td>
+                    <td>${m.target}</td>
+                    <td><strong>${m.cue}</strong></td>
+                    <td>
+                        ${m.isCorrect ? 
+                            '<span style="color: #27ae60;">✓ صحيح</span>' : 
+                            '<span style="color: #e74c3c;">✗ خطأ (${m.expectedCue})</span>'}
+                    </td>
+                    <td>${m.notes || '-'}</td>
+                    <td style="font-size: 0.85em;">
+                        ${m.date}<br>
+                        ${m.time}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-edit" onclick="editMeasurement(${m.id})">تعديل</button>
+                            <button class="btn-delete" onclick="deleteMeasurement(${m.id})">حذف</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            const total = measurements.length;
+            const oneRail = measurements.filter(m => m.rails === 1).length;
+            const twoRail = measurements.filter(m => m.rails === 2).length;
+            const threeRail = measurements.filter(m => m.rails === 3).length;
+            const fourRail = measurements.filter(m => m.rails === 4).length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('oneRailCount').textContent = oneRail;
+            document.getElementById('twoRailCount').textContent = twoRail;
+            document.getElementById('threeRailCount').textContent = threeRail;
+            document.getElementById('fourRailCount').textContent = fourRail;
+        }
+
+        // عرض الرسالة التنبيهية
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+
+            setTimeout(() => {
+                alert.className = 'alert';
+            }, 4000);
+        }
+
+        // تحديث آخر تحديث
+        function updateLastUpdate() {
+            const now = new Date().toLocaleTimeString('ar-SA');
+            document.getElementById('lastUpdate').textContent = now;
+        }
+
+        // دالة لتصدير البيانات
+        function exportData() {
+            const dataStr = JSON.stringify(measurements, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `billiards-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            showAlert('تم تصدير البيانات بنجاح ✅', 'success');
+        }
+
+        // دالة لاستيراد البيانات
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        measurements = [...measurements, ...imported];
+                        saveData();
+                        updateStats();
+                        renderTable();
+                        showAlert('تم استيراد البيانات بنجاح ✅', 'success');
+                    } catch (error) {
+                        showAlert('خطأ في استيراد البيانات ❌', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+    </script>
+</body>
+</html>
