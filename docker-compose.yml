@@ -1,0 +1,150 @@
+version: '3.8'
+
+##############################################################################
+#
+#  Docker Compose Configuration
+#
+#  الوظيفة: تشغيل التطبيق مع جميع الخدمات اللازمة
+#  الاستخدام: docker-compose up -d
+#
+#  الخدمات:
+#  1. App (Django/FastAPI)
+#  2. PostgreSQL (Database)
+#  3. Redis (Cache)
+#  4. Nginx (Reverse Proxy) - اختياري
+#
+##############################################################################
+
+services:
+  
+  # ==========================================
+  # تطبيق البلياردو الرئيسي
+  # ==========================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: billiards-app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.production
+    volumes:
+      - .:/app
+      - billiards_data:/app/.billiards_data
+      - billiards_logs:/app/logs
+      - billiards_static:/app/staticfiles
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - billiards_network
+    environment:
+      - DJANGO_SETTINGS_MODULE=hello_world.production_settings
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - REDIS_URL=redis://cache:6379/1
+    labels:
+      - "com.example.app=billiards"
+      - "com.example.version=2.0.0"
+  
+  # ==========================================
+  # قاعدة البيانات PostgreSQL
+  # ==========================================
+  db:
+    image: postgres:15-alpine
+    container_name: billiards-db
+    environment:
+      - POSTGRES_DB=${DB_NAME:-billiards_db}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --locale=ar_SA.UTF-8
+    volumes:
+      - billiards_postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - billiards_network
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+  
+  # ==========================================
+  # Redis Cache
+  # ==========================================
+  cache:
+    image: redis:7-alpine
+    container_name: billiards-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - billiards_redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - billiards_network
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+  
+  # ==========================================
+  # Nginx Reverse Proxy (اختياري)
+  # ==========================================
+  nginx:
+    image: nginx:alpine
+    container_name: billiards-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - billiards_static:/app/staticfiles:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - billiards_network
+    profiles:
+      - with-nginx  # تشغيل: docker-compose --profile with-nginx up
+
+# ==========================================
+# الأقراص (Volumes)
+# ==========================================
+volumes:
+  billiards_data:
+    driver: local
+  billiards_logs:
+    driver: local
+  billiards_postgres:
+    driver: local
+  billiards_redis:
+    driver: local
+  billiards_static:
+    driver: local
+
+# ==========================================
+# الشبكات
+# ==========================================
+networks:
+  billiards_network:
+    driver: bridge

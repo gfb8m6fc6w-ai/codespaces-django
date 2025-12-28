@@ -1,0 +1,72 @@
+.dockerignore
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.so
+.Python
+*.egg
+*.egg-info
+dist
+build
+.pytest_cache
+.tox
+.coverage
+htmlcov
+*.log
+.env
+.venv
+venv/
+ENV/
+env/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Database
+db.sqlite3
+*.db
+
+# Cache
+.cache
+.mypy_cache
+.dmypy.json
+dmypy.json
+
+# Project specific
+logs/
+media/
+staticfiles/
+*.bak
+.env.production
+.env.staging
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation
+*.md
+docs/
+
+# Tests
+test_*.py
+tests/
+.coverage
