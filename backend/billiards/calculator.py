@@ -6,9 +6,19 @@
 """
 
 from typing import Optional, Dict
-from ..models.shot import Shot, Difficulty
-from .rail_system import RailPositionsSystem
 import logging
+import sys
+from pathlib import Path
+
+# إضافة مسار المشروع
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+try:
+    from backend.models.shot import Shot, Difficulty
+    from backend.billiards.rail_system import RailPositionsSystem
+except ImportError:
+    from ..models.shot import Shot, Difficulty
+    from .rail_system import RailPositionsSystem
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 """
-API REST محسّن باستخدام FastAPI
+API REST محسّن باستخدام FastAPI أو بديل HTTP بسيط
 يوفر واجهة موحدة لجميع أنظمة البلياردو
+
+الاستخدام:
+  python api.py          # إذا كانت FastAPI مثبتة
+  python run_server.py   # إذا لم تكن FastAPI مثبتة
 """
 
-from fastapi import FastAPI, HTTPException, File, UploadFile, Query
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from typing import List, Optional
 import json
 from pathlib import Path
 import logging
@@ -19,36 +19,71 @@ logger = logging.getLogger(__name__)
 # إضافة مسار المشروع
 sys.path.insert(0, str(Path(__file__).parent))
 
+# ==========================================
+# استيراد المكتبات المطلوبة
+# ==========================================
+
 try:
     from backend.billiards.engine import BilliardsEngine
     from backend.billiards.calculator import ShotCalculator
     from backend.models.shot import Shot, Difficulty
-    logger.info("✅ تم استيراد جميع المكتبات بنجاح")
+    logger.info("✅ تم استيراد مكتبات البلياردو بنجاح")
 except ImportError as e:
-    logger.error(f"❌ خطأ في الاستيراد: {e}")
-    raise
+    logger.error(f"❌ خطأ في استيراد المكتبات: {e}")
+    print("\n⚠️ خطأ: لم يتم العثور على المكتبات المطلوبة")
+    print("   تأكد من تثبيت المتطلبات:")
+    print("   pip install -r requirements.txt")
+    sys.exit(1)
 
-# إنشاء تطبيق FastAPI
-app = FastAPI(
-    title="5A Diamond System Pro API",
-    description="API احترافي لنظام تحليل تسديدات البلياردو",
-    version="2.0.0",
-)
+# محاولة استيراد FastAPI
+FASTAPI_AVAILABLE = False
+try:
+    from fastapi import FastAPI, HTTPException, File, UploadFile, Query
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import JSONResponse
+    from typing import List, Optional
+    
+    FASTAPI_AVAILABLE = True
+    logger.info("✅ FastAPI متاح")
+    
+except ImportError:
+    logger.warning("⚠️ FastAPI غير مثبت")
+    logger.info("   للتثبيت: pip install fastapi uvicorn")
+    logger.info("   أو استخدم: python run_server.py")
 
-# إضافة CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8000", "http://127.0.0.1"],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
-)
-
+# ==========================================
 # تهيئة محرك البلياردو
-engine = BilliardsEngine()
-calculator = ShotCalculator()
+# ==========================================
 
-logger.info("✅ محرك البلياردو تم تهيئته")
+try:
+    engine = BilliardsEngine()
+    calculator = ShotCalculator()
+    logger.info("✅ محرك البلياردو تم تهيئته بنجاح")
+except Exception as e:
+    logger.error(f"❌ خطأ في تهيئة المحرك: {e}")
+    sys.exit(1)
+
+
+# ==========================================
+# إنشاء تطبيق FastAPI
+# ==========================================
+
+if FASTAPI_AVAILABLE:
+    
+    app = FastAPI(
+        title="5A Diamond System Pro API",
+        description="API احترافي لنظام تحليل تسديدات البلياردو",
+        version="2.0.0",
+    )
+    
+    # إضافة CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:3000", "http://localhost:8000", "http://127.0.0.1"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+    )
 
 
 # ==========================================
@@ -332,11 +367,27 @@ async def general_exception_handler(request, exc):
 
 
 if __name__ == "__main__":
-    import uvicorn
-    logger.info("🚀 بدء خادم FastAPI...")
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8001,
-        log_level="info",
-    )
+    if FASTAPI_AVAILABLE:
+        try:
+            import uvicorn
+            logger.info("🚀 بدء خادم FastAPI...")
+            uvicorn.run(
+                app,
+                host="0.0.0.0",
+                port=8001,
+                log_level="info",
+            )
+        except ImportError:
+            logger.error("❌ uvicorn غير مثبت")
+            logger.info("   للتثبيت: pip install uvicorn")
+            logger.info("   أو استخدم: python run_server.py")
+            sys.exit(1)
+        except Exception as e:
+            logger.error(f"❌ خطأ في بدء الخادم: {e}")
+            sys.exit(1)
+    else:
+        logger.error("❌ FastAPI غير مثبت")
+        logger.info("\nالخيارات المتاحة:")
+        logger.info("1️⃣  تثبيت FastAPI: pip install fastapi uvicorn")
+        logger.info("2️⃣  استخدام خادم بديل: python run_server.py")
+        sys.exit(1)

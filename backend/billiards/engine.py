@@ -5,13 +5,24 @@
 """
 
 from typing import List, Optional, Dict
-from .calculator import ShotCalculator
-from .rail_system import RailPositionsSystem
-from ..models.shot import Shot
-from ..models.statistics import Statistics
 import json
 from pathlib import Path
 import logging
+import sys
+
+# إضافة مسار المشروع
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+try:
+    from backend.billiards.calculator import ShotCalculator
+    from backend.billiards.rail_system import RailPositionsSystem
+    from backend.models.shot import Shot
+    from backend.models.statistics import Statistics
+except ImportError:
+    from .calculator import ShotCalculator
+    from .rail_system import RailPositionsSystem
+    from ..models.shot import Shot
+    from ..models.statistics import Statistics
 
 logger = logging.getLogger(__name__)
 
