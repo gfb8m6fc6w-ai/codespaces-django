@@ -38,6 +38,7 @@ urlpatterns = [
     path("", core_views.index),
     path("health/", health_check, name="health"),
     path("api/health/", health_check, name="api_health"),
+    path("api/info/", core_views.api_info, name="api_info"),
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
