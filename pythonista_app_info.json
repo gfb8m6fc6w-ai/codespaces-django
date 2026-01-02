@@ -1,0 +1,43 @@
+{
+  "app_name": "حاسبة البلياردو",
+  "version": "1.0",
+  "platform": "Pythonista 3",
+  "supported_ios": "12.0+",
+  "created_date": "2026-01-02T02:45:01.169653",
+  "files": {
+    "basic": {
+      "name": "pythonista_billiards_app.py",
+      "description": "النسخة الأساسية - تطبيق بسيط وفعال",
+      "size": "~15KB",
+      "features": [
+        "حساب نسبة النجاح",
+        "واجهة رسومية",
+        "حفظ البيانات",
+        "إحصائيات أساسية"
+      ]
+    },
+    "advanced": {
+      "name": "pythonista_advanced_billiards.py",
+      "description": "النسخة المتقدمة - مميزات إضافية",
+      "size": "~40KB",
+      "features": [
+        "تبويبات متعددة",
+        "حسابات متقدمة",
+        "توصيات ذكية",
+        "تحليل الأداء",
+        "إحصائيات شاملة"
+      ]
+    }
+  },
+  "installation_methods": [
+    "iCloud Drive",
+    "Email",
+    "Web Server",
+    "USB Transfer"
+  ],
+  "data_storage": "~/Documents/BilliardsApp/",
+  "language": "العربية الكاملة",
+  "internet_required": false,
+  "paid_features": null,
+  "support_email": "support@example.com"
+}
