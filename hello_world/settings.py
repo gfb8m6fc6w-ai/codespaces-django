@@ -29,12 +29,34 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+ALLOWED_HOSTS = ['*']
+
+# إعدادات CSRF والـ CORS للـ Codespaces و iPad
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://*',
+    'https://*',
+]
 
 if 'CODESPACE_NAME' in os.environ:
-    codespace_name = config("CODESPACE_NAME")
-    codespace_domain = config("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")
-    CSRF_TRUSTED_ORIGINS = [f'https://{codespace_name}-8000.{codespace_domain}']
+    codespace_name = os.environ.get('CODESPACE_NAME', '')
+    codespace_domain = os.environ.get('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN', '')
+    if codespace_name and codespace_domain:
+        CSRF_TRUSTED_ORIGINS.extend([
+            f'https://{codespace_name}-8000.{codespace_domain}',
+            f'http://{codespace_name}-8000.{codespace_domain}',
+        ])
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://*",
+    "https://*",
+]
+
+# السماح بـ X-Frame-Options للـ iPad و Codespaces
+X_FRAME_OPTIONS = "ALLOW-FROM PREVIEW.APP.GITHUB.DEV"
 
 # Application definition
 
@@ -59,7 +81,12 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
-X_FRAME_OPTIONS = "ALLOW-FROM preview.app.github.dev"
+# تعطيل بعض فحوصات الأمان للتطوير
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
 
 ROOT_URLCONF = "hello_world.urls"
 

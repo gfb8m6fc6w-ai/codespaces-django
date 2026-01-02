@@ -19,11 +19,25 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from hello_world.core import views as core_views
 
+# Health check endpoint للـ iPad
+@require_http_methods(["GET", "HEAD"])
+def health_check(request):
+    """فحص صحة الخادم"""
+    return JsonResponse({
+        'status': 'ok',
+        'message': 'الخادم يعمل بنجاح ✅',
+        'debug': settings.DEBUG,
+    })
+
 urlpatterns = [
     path("", core_views.index),
+    path("health/", health_check, name="health"),
+    path("api/health/", health_check, name="api_health"),
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
