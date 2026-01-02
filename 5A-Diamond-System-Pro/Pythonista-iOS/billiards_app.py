@@ -131,7 +131,7 @@ class DataManager:
     
     def __init__(self):
         # استخدام مجلد Documents في Pythonista
-        self.data_dir = Path(os.path.expanduser('~/Documents/BilliardsApp'))
+        self.data_dir = Path(os.path.expanduser('~/Documents/5A-Diamond-System'))
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.shots_file = self.data_dir / 'shots.json'
         self.stats_file = self.data_dir / 'statistics.json'
@@ -361,7 +361,7 @@ class MainController(ui.ViewController):
         message = f"""
 الإحصائيات الكاملة
 ━━━━━━━━━━━━━━━
-إجمالي التسديدات: {stats['total_shots']}
+            إجمالي التسديدات: {stats['total_shots']}
 متوسط النجاح: {stats['average_success_rate']}%
 
 آخر تسديقة:

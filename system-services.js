@@ -5,13 +5,16 @@
  * للتطبيق بأكمله
  */
 
+// ✅ مفتاح التخزين الموحد
+const STORAGE_KEY = '5a-diamond-system-data';
+
 // ==========================================
 // 1️⃣ خدمة التخزين المركزي
 // ==========================================
 
 class StorageService {
     constructor() {
-        this.storageKey = 'billiardsAppStorage';
+        this.storageKey = STORAGE_KEY + '-app';
         this.initStorage();
     }
 

@@ -1,0 +1,56 @@
+{
+    "language": "ar",
+    "version": "1.0.0",
+    "app_name": "5A Diamond System Pro",
+    "difficulty_levels": [
+        {"id": 0, "name": "سهل جداً", "factor": 1.5},
+        {"id": 1, "name": "سهل", "factor": 1.2},
+        {"id": 2, "name": "متوسط", "factor": 1.0},
+        {"id": 3, "name": "صعب", "factor": 0.8},
+        {"id": 4, "name": "صعب جداً", "factor": 0.6},
+        {"id": 5, "name": "احترافي", "factor": 0.4}
+    ],
+    "angle_range": {"min": -90, "max": 90},
+    "power_range": {"min": 0, "max": 100},
+    "distance_range": {"min": 0, "max": 500},
+    "api_endpoints": {
+        "calculate": "/api/v1/calculate",
+        "statistics": "/api/v1/statistics",
+        "shots": "/api/v1/shots"
+    },
+    "storage": {
+        "type": "localStorage",
+        "key": "5a-diamond-system-data"
+    },
+    "app_version": "3.0.0",
+    "data_paths": {
+        "pythonista": "~/Documents/5A-Diamond-System",
+        "pwa": "localStorage",
+        "backend": "./.billiards_data"
+    },
+    "limits": {
+        "min_rails": 1,
+        "max_rails": 4,
+        "min_position": 0.0,
+        "max_position": 10.0,
+        "max_measurements": 10000
+    },
+    "themes": {
+        "dark": {
+            "bg": "#1a1a2e",
+            "text": "#eee",
+            "primary": "#16c784",
+            "secondary": "#0f3460",
+            "danger": "#e94560",
+            "accent": "#f39c12"
+        },
+        "light": {
+            "bg": "#f8f9fa",
+            "text": "#212529",
+            "primary": "#667eea",
+            "secondary": "#764ba2",
+            "danger": "#e74c3c",
+            "accent": "#ffc107"
+        }
+    }
+}

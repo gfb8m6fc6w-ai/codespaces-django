@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-تطبيق البلياردو المتقدم - نسخة Pythonista الكاملة
-Advanced Billiards App - Complete Pythonista Edition
+تطبيق البلياردو المتقدم - نسخة Pythonista الكاملة المُصلّحة
+Advanced Billiards App - Fixed & Enhanced Pythonista Edition
 
 المميزات المتقدمة:
 ✅ حسابات متقدمة للتسديدات
 ✅ نظام السجلات التفصيلي
-✅ تحليل الأداء
-✅ توقعات ذكية
-✅ واجهة رسومية احترافية
+✅ تحليل الأداء والاتجاهات
+✅ توقعات ذكية وتوصيات
+✅ واجهة رسومية احترافية بتبويبات
 ✅ دعم اللغة العربية الكامل
+✅ حفظ وتحميل البيانات تلقائياً
+✅ إحصائيات شاملة ومتقدمة
 """
 
 import ui
 import json
+import console
+import dialogs
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -58,7 +62,7 @@ class Shot:
         self.distance = float(distance)
         self.difficulty = int(difficulty)
         self.cue_type = cue_type
-        self.success = success
+        self.success_rate = success  # ✅ اسم الخاصية الصحيح
         self.timestamp = datetime.now().isoformat()
         self.id = int(datetime.now().timestamp() * 1000)
     
@@ -70,21 +74,21 @@ class Shot:
             'distance': self.distance,
             'difficulty': self.difficulty,
             'cue_type': self.cue_type,
-            'success': self.success,
+            'success_rate': self.success_rate,  # ✅ الحفظ الصحيح
             'timestamp': self.timestamp
         }
     
     @staticmethod
     def from_dict(data):
         shot = Shot(
-            angle=data['angle'],
-            power=data['power'],
-            distance=data['distance'],
-            difficulty=data['difficulty'],
+            angle=data.get('angle', 0),
+            power=data.get('power', 0),
+            distance=data.get('distance', 0),
+            difficulty=data.get('difficulty', 2),
             cue_type=data.get('cue_type', 'عادي'),
-            success=data.get('success')
+            success=data.get('success_rate')  # ✅ المفتاح الصحيح
         )
-        shot.timestamp = data['timestamp']
+        shot.timestamp = data.get('timestamp', shot.timestamp)
         shot.id = data.get('id', shot.id)
         return shot
 
@@ -138,13 +142,11 @@ class AdvancedCalculator:
     
     def _calculate_angle_factor(self, angle):
         """حساب تأثير الزاوية"""
-        # 0 درجة = 100، كلما ابتعدنا عن 0 = أقل
-        angle_penalty = abs(angle) / 90 * 50  # يصل إلى 50 نقطة فقدان
+        angle_penalty = abs(angle) / 90 * 50
         return 100 - angle_penalty
     
     def _calculate_power_factor(self, power):
         """حساب تأثير القوة"""
-        # 50 = مثالي
         if power < 0 or power > 100:
             return 0
         
@@ -168,21 +170,13 @@ class AdvancedCalculator:
     
     def recommend_power(self, distance):
         """توصية بالقوة المثالية"""
-        # الصيغة: Power = 40 + (distance * 0.15)
         return min(100, 40 + (distance * 0.15))
-    
-    def recommend_angle(self, target_accuracy=80):
-        """توصية بالزاوية للدقة المطلوبة"""
-        # كل 1 درجة = 0.56 نقطة فقدان
-        max_angle = (100 - target_accuracy) / 0.56
-        return min(90, max_angle)
     
     def analyze_trend(self, shots):
         """تحليل الاتجاهات في الأداء"""
         if len(shots) < 3:
             return {'trend': 'محدود', 'improvement': 0}
         
-        # حساب متوسط النجاح
         recent = shots[-10:] if len(shots) > 10 else shots
         success_rates = [s.success for s in recent if s.success is not None]
         
@@ -219,7 +213,7 @@ class AdvancedDataManager:
         self.sessions_file = self.data_dir / 'sessions.json'
     
     def save_shot(self, shot):
-        """حفظ التسديدة"""
+        """حفظ التسديدة مع معالجة الأخطاء"""
         try:
             shots = self.load_shots()
             shots.append(shot.to_dict())
@@ -227,7 +221,7 @@ class AdvancedDataManager:
                 json.dump(shots, f, ensure_ascii=False, indent=2)
             return True
         except Exception as e:
-            print(f'Error saving shot: {e}')
+            console.print_message(f'خطأ في حفظ التسديدة: {e}', color=(1, 0, 0))
             return False
     
     def load_shots(self):
@@ -260,52 +254,80 @@ class AdvancedDataManager:
                 'favorite_difficulty': 'لا توجد بيانات'
             }
         
-        # إحصائيات أساسية
         total = len(shots)
-        with_success = [s for s in shots if s.success is not None]
+        with_success = [s for s in shots if s.success_rate is not None]
         
         if with_success:
-            success_rates = [s.success for s in with_success]
+            success_rates = [s.success_rate for s in with_success]
             avg_success = sum(success_rates) / len(success_rates)
-            best_shot = max(with_success, key=lambda s: s.success)
-            worst_shot = min(with_success, key=lambda s: s.success)
+            best_shot = max(with_success, key=lambda s: s.success_rate or 0)
+            worst_shot = min(with_success, key=lambda s: s.success_rate or 0)
         else:
             avg_success = 0
             best_shot = None
             worst_shot = None
         
+        # حساب آخر 10
+        last_10_rates = [s.success_rate for s in shots[-10:] if s.success_rate]
+        last_10_avg = sum(last_10_rates) / len(last_10_rates) if last_10_rates else 0
+        
+        # تحليل الاتجاه
+        trend = self._analyze_trend(shots)
+        
         return {
             'total_shots': total,
-            'with_success_data': len(with_success),
+            'successful_shots': len(with_success),
             'success_rate': (len(with_success) / total * 100) if total > 0 else 0,
             'avg_success': avg_success,
             'best_shot': best_shot,
             'worst_shot': worst_shot,
-            'last_10_avg': sum([s.success for s in shots[-10:] if s.success]) / 
-                          len([s for s in shots[-10:] if s.success]) 
-                          if any(s.success for s in shots[-10:]) else 0
+            'last_10_avg': last_10_avg,
+            'trend': trend
         }
+    
+    def _analyze_trend(self, shots):
+        """تحليل الاتجاه في الأداء"""
+        if len(shots) < 5:
+            return 'محدود'
+        
+        recent = shots[-10:] if len(shots) > 10 else shots
+        recent_rates = [s.success_rate for s in recent if s.success_rate]
+        
+        if not recent_rates:
+            return 'محدود'
+        
+        avg_recent = sum(recent_rates) / len(recent_rates)
+        
+        if len(shots) > 10:
+            older = shots[-20:-10]
+            older_rates = [s.success_rate for s in older if s.success_rate]
+            avg_older = sum(older_rates) / len(older_rates) if older_rates else 50
+        else:
+            avg_older = 50
+        
+        improvement = avg_recent - avg_older
+        
+        if improvement > 10:
+            return 'تحسن كبير ⬆️'
+        elif improvement > 0:
+            return 'تحسن ملحوظ ⬆️'
+        elif improvement < -10:
+            return 'تراجع كبير ⬇️'
+        elif improvement < 0:
+            return 'تراجع ملحوظ ⬇️'
+        else:
+            return 'مستقر ➡️'
     
     def clear_data(self):
         """حذف جميع البيانات"""
         try:
-            if self.shots_file.exists():
-                self.shots_file.unlink()
-            if self.sessions_file.exists():
-                self.sessions_file.unlink()
+            if self.file_path.exists():
+                self.file_path.unlink()
+            console.print_message('تم مسح جميع البيانات بنجاح', color=(0, 1, 0))
             return True
-        except Exception:
+        except Exception as e:
+            console.print_message(f'خطأ في مسح البيانات: {e}', color=(1, 0, 0))
             return False
-
-# ==================== الواجهة الرسومية المتقدمة ====================
-
-class AdvancedBilliardsApp(ui.View):
-    """التطبيق الرئيسي المتقدم"""
-    
-    def __init__(self):
-        self.calculator = AdvancedCalculator()
-        self.data_manager = AdvancedDataManager()
-        self.current_tab = 0
 
 class TabViewController(ui.ViewController):
     """عارض التبويبات"""
@@ -320,18 +342,14 @@ class TabViewController(ui.ViewController):
         self.view = ui.View()
         self.view.background_color = COLOR_BG
         
-        # اللوحة العلوية
         self.create_header()
         
-        # مساحة المحتوى
         self.content_container = ui.View()
         self.content_container.frame = (0, 60, self.view.width, self.view.height - 120)
         self.view.add_subview(self.content_container)
         
-        # اللوحة السفلية (التبويبات)
         self.create_tab_bar()
         
-        # عرض علامة التبويب الأولى
         self.show_calculator_tab()
     
     def create_header(self):
@@ -342,7 +360,7 @@ class TabViewController(ui.ViewController):
         self.view.add_subview(header)
         
         title = ui.Label()
-        title.text = 'حاسبة البلياردو'
+        title.text = 'حاسبة البلياردو المتقدمة'
         title.font = ('<system>', 18)
         title.text_color = COLOR_TEXT
         title.alignment = ui.ALIGN_CENTER
@@ -358,22 +376,19 @@ class TabViewController(ui.ViewController):
         
         tab_width = self.view.width / 3
         
-        # التبويب الأول
         btn1 = ui.Button(title='📊 حساب')
         btn1.frame = (0, 0, tab_width, 60)
         btn1.tint_color = COLOR_PRIMARY
         btn1.action = lambda: self.switch_tab(0)
         tabbar.add_subview(btn1)
         
-        # التبويب الثاني
         btn2 = ui.Button(title='📈 إحصائيات')
         btn2.frame = (tab_width, 0, tab_width, 60)
         btn2.tint_color = COLOR_ACCENT
         btn2.action = lambda: self.switch_tab(1)
         tabbar.add_subview(btn2)
         
-        # التبويب الثالث
-        btn3 = ui.Button(title='⚙️ الإعدادات')
+        btn3 = ui.Button(title='⚙️ إعدادات')
         btn3.frame = (tab_width * 2, 0, tab_width, 60)
         btn3.tint_color = COLOR_DANGER
         btn3.action = lambda: self.switch_tab(2)
@@ -381,8 +396,6 @@ class TabViewController(ui.ViewController):
     
     def switch_tab(self, tab_id):
         """التبديل بين التبويبات"""
-        self.current_tab = tab_id
-        # مسح المحتوى السابق
         for subview in list(self.content_container.subviews):
             subview.remove_from_superview()
         
@@ -397,7 +410,6 @@ class TabViewController(ui.ViewController):
         """عرض علامة تبويب الحساب"""
         y = 10
         
-        # الزاوية
         angle_label = ui.Label()
         angle_label.text = 'الزاوية (°)'
         angle_label.font = ('<system>', 12)
@@ -411,11 +423,9 @@ class TabViewController(ui.ViewController):
         self.angle_slider.max_value = ANGLE_MAX
         self.angle_slider.value = 0
         self.angle_slider.frame = (10, y, 280, 32)
-        self.angle_slider.action = self.on_angle_changed
         self.content_container.add_subview(self.angle_slider)
         y += 40
         
-        # القوة
         power_label = ui.Label()
         power_label.text = 'القوة (0-100)'
         power_label.font = ('<system>', 12)
@@ -429,11 +439,9 @@ class TabViewController(ui.ViewController):
         self.power_slider.max_value = POWER_MAX
         self.power_slider.value = 50
         self.power_slider.frame = (10, y, 280, 32)
-        self.power_slider.action = self.on_power_changed
         self.content_container.add_subview(self.power_slider)
         y += 40
         
-        # المسافة
         distance_label = ui.Label()
         distance_label.text = 'المسافة (سم)'
         distance_label.font = ('<system>', 12)
@@ -447,11 +455,9 @@ class TabViewController(ui.ViewController):
         self.distance_slider.max_value = DISTANCE_MAX
         self.distance_slider.value = 100
         self.distance_slider.frame = (10, y, 280, 32)
-        self.distance_slider.action = self.on_distance_changed
         self.content_container.add_subview(self.distance_slider)
         y += 40
         
-        # الصعوبة
         difficulty_label = ui.Label()
         difficulty_label.text = 'مستوى الصعوبة'
         difficulty_label.font = ('<system>', 12)
@@ -462,14 +468,13 @@ class TabViewController(ui.ViewController):
         
         self.difficulty_seg = ui.SegmentedControl()
         self.difficulty_seg.segments = [
-            'سهل', 'متوسط', 'صعب', 'احترافي'
+            'سهل جداً', 'سهل', 'متوسط', 'صعب', 'صعب جداً', 'احترافي'
         ]
-        self.difficulty_seg.selected_index = 1
+        self.difficulty_seg.selected_index = 2
         self.difficulty_seg.frame = (10, y, 280, 32)
         self.content_container.add_subview(self.difficulty_seg)
         y += 40
         
-        # زر الحساب
         calc_btn = ui.Button(title='حساب النجاح')
         calc_btn.frame = (10, y, 280, 44)
         calc_btn.tint_color = COLOR_PRIMARY
@@ -477,7 +482,6 @@ class TabViewController(ui.ViewController):
         self.content_container.add_subview(calc_btn)
         y += 50
         
-        # النتيجة
         self.result_label = ui.Label()
         self.result_label.text = 'انقر على الحساب'
         self.result_label.font = ('<system>', 16)
@@ -496,6 +500,7 @@ class TabViewController(ui.ViewController):
             f'إجمالي التسديدات: {stats["total_shots"]}',
             f'متوسط النجاح: {stats["avg_success"]:.1f}%',
             f'آخر 10: {stats["last_10_avg"]:.1f}%',
+            f'نسبة النجاح الكلية: {stats["success_rate"]:.1f}%'
         ]
         
         for text in stat_texts:
@@ -511,7 +516,7 @@ class TabViewController(ui.ViewController):
         """عرض علامة تبويب الإعدادات"""
         y = 10
         
-        clear_btn = ui.Button(title='مسح البيانات')
+        clear_btn = ui.Button(title='مسح جميع البيانات')
         clear_btn.frame = (10, y, 280, 44)
         clear_btn.tint_color = COLOR_DANGER
         clear_btn.action = self.clear_data
@@ -520,24 +525,12 @@ class TabViewController(ui.ViewController):
         y += 50
         
         info_label = ui.Label()
-        info_label.text = 'البيانات محفوظة في:\n~/Documents/BilliardsAdvanced/'
+        info_label.text = 'ملتزمة بحفظ البيانات:\n~/Documents/BilliardsAdvanced/'
         info_label.font = ('<system>', 12)
         info_label.text_color = COLOR_TEXT
         info_label.number_of_lines = 0
         info_label.frame = (10, y, 280, 60)
         self.content_container.add_subview(info_label)
-    
-    def on_angle_changed(self, sender):
-        """تحديث الزاوية"""
-        pass
-    
-    def on_power_changed(self, sender):
-        """تحديث القوة"""
-        pass
-    
-    def on_distance_changed(self, sender):
-        """تحديث المسافة"""
-        pass
     
     def calculate(self, sender):
         """حساب نسبة النجاح"""
@@ -545,17 +538,15 @@ class TabViewController(ui.ViewController):
             angle = self.angle_slider.value
             power = self.power_slider.value
             distance = self.distance_slider.value
-            difficulty = self.difficulty_seg.selected_index + 1
+            difficulty = self.difficulty_seg.selected_index
             
             success_rate = self.calculator.calculate_success_rate(
                 angle, power, distance, difficulty
             )
             
-            # حفظ التسديدة
             shot = Shot(angle, power, distance, difficulty, success=success_rate)
             self.data_manager.save_shot(shot)
             
-            # عرض النتيجة
             self.result_label.text = f'✓ نسبة النجاح\n{success_rate:.1f}%'
             
         except Exception as e:
@@ -567,8 +558,6 @@ class TabViewController(ui.ViewController):
             ui.alert_message('تم', 'تم حذف جميع البيانات')
         else:
             ui.alert_message('خطأ', 'فشل حذف البيانات')
-
-# ==================== تشغيل التطبيق ====================
 
 def main():
     """تشغيل البرنامج الرئيسي"""

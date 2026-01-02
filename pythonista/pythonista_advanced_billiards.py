@@ -49,7 +49,7 @@ DIFFICULTY_LEVELS = [
 # ==================== نماذج البيانات ====================
 
 class Shot:
-    """نموذج التسديقة المتقدم"""
+    """نموذج التسديدة المتقدم"""
     
     def __init__(self, angle=0, power=0, distance=0, difficulty=2, 
                  cue_type='عادي', success=None):
@@ -89,7 +89,7 @@ class Shot:
         return shot
 
 class AdvancedCalculator:
-    """حاسبة التسديقات المتقدمة"""
+    """حاسبة التسديدات المتقدمة"""
     
     def __init__(self):
         self.cue_types = {
@@ -102,7 +102,7 @@ class AdvancedCalculator:
     def calculate_success_rate(self, angle, power, distance, difficulty, 
                               cue_type='عادي'):
         """
-        حساب شامل لنسبة نجاح التسديقة
+        حساب شامل لنسبة نجاح التسديدة
         
         المعادلة:
         Success = (Angle × 0.25) + (Power × 0.25) + (Distance × 0.25) + (Difficulty × 0.25)
@@ -219,7 +219,7 @@ class AdvancedDataManager:
         self.sessions_file = self.data_dir / 'sessions.json'
     
     def save_shot(self, shot):
-        """حفظ التسديقة"""
+        """حفظ التسديدة"""
         try:
             shots = self.load_shots()
             shots.append(shot.to_dict())
@@ -231,7 +231,7 @@ class AdvancedDataManager:
             return False
     
     def load_shots(self):
-        """تحميل التسديقات"""
+        """تحميل التسديدات"""
         try:
             if self.shots_file.exists():
                 with open(self.shots_file, 'r', encoding='utf-8') as f:
@@ -241,7 +241,7 @@ class AdvancedDataManager:
         return []
     
     def get_shots_list(self):
-        """الحصول على قائمة التسديقات"""
+        """الحصول على قائمة التسديدات"""
         data = self.load_shots()
         return [Shot.from_dict(d) for d in data]
     
@@ -493,7 +493,7 @@ class TabViewController(ui.ViewController):
         y = 10
         
         stat_texts = [
-            f'إجمالي التسديقات: {stats["total_shots"]}',
+            f'إجمالي التسديدات: {stats["total_shots"]}',
             f'متوسط النجاح: {stats["avg_success"]:.1f}%',
             f'آخر 10: {stats["last_10_avg"]:.1f}%',
         ]
@@ -551,7 +551,7 @@ class TabViewController(ui.ViewController):
                 angle, power, distance, difficulty
             )
             
-            # حفظ التسديقة
+            # حفظ التسديدة
             shot = Shot(angle, power, distance, difficulty, success=success_rate)
             self.data_manager.save_shot(shot)
             

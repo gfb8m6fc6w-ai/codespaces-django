@@ -5,7 +5,7 @@
 يختبر:
 - استيراد جميع المكتبات
 - تهيئة محرك البلياردو
-- حساب التسديقات
+- حساب التسديدات
 - الإحصائيات
 - التخزين والاسترجاع
 """
@@ -75,7 +75,7 @@ def test_engine_initialization():
         engine = BilliardsEngine()
         
         logger.info(f"✅ تم تهيئة المحرك")
-        logger.info(f"   - عدد التسديقات: {len(engine.shots)}")
+        logger.info(f"   - عدد التسديدات: {len(engine.shots)}")
         logger.info(f"   - الإحصائيات: {engine.statistics}")
         
         return engine
@@ -85,9 +85,9 @@ def test_engine_initialization():
 
 
 def test_shot_calculation(engine):
-    """اختبار حساب التسديقات"""
+    """اختبار حساب التسديدات"""
     print("\n" + "="*60)
-    print("3️⃣  اختبار حساب التسديقات")
+    print("3️⃣  اختبار حساب التسديدات")
     print("="*60)
     
     try:
@@ -124,17 +124,17 @@ def test_shot_calculation(engine):
         logger.info(f"✅ تسديقة 3: {shot3.rails} جدران، صعوبة {shot3.difficulty.value}")
         logger.info(f"   - احتمال النجاح: {shot3.success_rate}%")
         
-        logger.info(f"✅ إجمالي التسديقات: {len(engine.shots)}")
+        logger.info(f"✅ إجمالي التسديدات: {len(engine.shots)}")
         return True
     except Exception as e:
-        logger.error(f"❌ خطأ في حساب التسديقات: {e}")
+        logger.error(f"❌ خطأ في حساب التسديدات: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
 def test_shot_execution(engine):
-    """اختبار تسجيل نتائج التسديقات"""
+    """اختبار تسجيل نتائج التسديدات"""
     print("\n" + "="*60)
     print("4️⃣  اختبار تسجيل النتائج")
     print("="*60)
@@ -175,8 +175,8 @@ def test_statistics(engine):
         
         logger.info(f"📊 الإحصائيات:")
         logger.info(f"   - إجمالي الحسابات: {stats['total_calculations']}")
-        logger.info(f"   - إجمالي التسديقات المنفذة: {stats['total_shots_attempted']}")
-        logger.info(f"   - التسديقات الناجحة: {stats['total_shots_successful']}")
+        logger.info(f"   - إجمالي التسديدات المنفذة: {stats['total_shots_attempted']}")
+        logger.info(f"   - التسديدات الناجحة: {stats['total_shots_successful']}")
         logger.info(f"   - معدل النجاح: {stats['success_rate']}%")
         logger.info(f"   - متوسط الصعوبة: {stats['average_difficulty']}")
         
@@ -286,11 +286,11 @@ def main():
         return
     results.append(("تهيئة المحرك", True))
     
-    # اختبار 3: حساب التسديقات
+    # اختبار 3: حساب التسديدات
     if not test_shot_calculation(engine):
-        logger.error("❌ فشل اختبار حساب التسديقات")
+        logger.error("❌ فشل اختبار حساب التسديدات")
         return
-    results.append(("حساب التسديقات", True))
+    results.append(("حساب التسديدات", True))
     
     # اختبار 4: تسجيل النتائج
     if not test_shot_execution(engine):

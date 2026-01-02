@@ -1,0 +1,46 @@
+{
+  "name": "نظام البلياردو المتقدم - 5A Diamond System Pro",
+  "short_name": "البلياردو Pro",
+  "description": "نظام احترافي متكامل لتحليل ومحاكاة تسديدات البلياردو باستخدام نظام الدايمند العشري",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "/assets/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "productivity"],
+  "shortcuts": [
+    {
+      "name": "حساب تسديقة جديدة",
+      "short_name": "حساب",
+      "url": "/app/?mode=calculate",
+      "icons": [{"src": "/assets/shortcut-calc.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "عرض الإحصائيات",
+      "short_name": "إحصائيات",
+      "url": "/app/?mode=statistics",
+      "icons": [{"src": "/assets/shortcut-stats.png", "sizes": "192x192"}]
+    }
+  ]
+}

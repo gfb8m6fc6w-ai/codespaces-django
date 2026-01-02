@@ -2,6 +2,9 @@
 let deferredPrompt;
 let isStandalone = false;
 
+// ✅ مفتاح التخزين الموحد
+const STORAGE_KEY = '5a-diamond-system-data';
+
 // التحقق من وضع التطبيق
 function checkStandaloneMode() {
     isStandalone = (window.matchMedia('(display-mode: standalone)').matches) || 
@@ -69,10 +72,15 @@ if ('serviceWorker' in navigator) {
 // 🗄️ نظام إدارة القياسات الكامل
 class ShotDatabaseManager {
     constructor() {
-        this.localDatabase = JSON.parse(localStorage.getItem('5a-diamond-database')) || {};
-        this.customShots = JSON.parse(localStorage.getItem('5a-custom-shots')) || [];
-        this.backups = JSON.parse(localStorage.getItem('5a-backups')) || [];
-        this.categories = JSON.parse(localStorage.getItem('5a-categories')) || this.getDefaultCategories();
+        this.storageKey = STORAGE_KEY + '-database';
+        this.customKey = STORAGE_KEY + '-custom';
+        this.backupsKey = STORAGE_KEY + '-backups';
+        this.categoriesKey = STORAGE_KEY + '-categories';
+        
+        this.localDatabase = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+        this.customShots = JSON.parse(localStorage.getItem(this.customKey)) || [];
+        this.backups = JSON.parse(localStorage.getItem(this.backupsKey)) || [];
+        this.categories = JSON.parse(localStorage.getItem(this.categoriesKey)) || this.getDefaultCategories();
         
         this.initDatabase();
     }
@@ -480,10 +488,10 @@ class ShotDatabaseManager {
     
     // 💾 حفظ في التخزين المحلي
     saveToLocalStorage() {
-        localStorage.setItem('5a-diamond-database', JSON.stringify(this.localDatabase));
-        localStorage.setItem('5a-custom-shots', JSON.stringify(this.customShots));
-        localStorage.setItem('5a-backups', JSON.stringify(this.backups));
-        localStorage.setItem('5a-categories', JSON.stringify(this.categories));
+        localStorage.setItem(STORAGE_KEY + '-database', JSON.stringify(this.localDatabase));
+        localStorage.setItem(STORAGE_KEY + '-custom', JSON.stringify(this.customShots));
+        localStorage.setItem(STORAGE_KEY + '-backups', JSON.stringify(this.backups));
+        localStorage.setItem(STORAGE_KEY + '-categories', JSON.stringify(this.categories));
     }
 }
 
@@ -1069,7 +1077,7 @@ class DiamondSystemEditor {
     }
     
     saveToStorage() {
-        localStorage.setItem('custom-diamond-system', JSON.stringify(this.diamondValues));
+        localStorage.setItem(STORAGE_KEY + '-diamond', JSON.stringify(this.diamondValues));
         // إعادة تحميل النظام في التطبيق
         window.DIAMOND_SYSTEM = this.diamondValues;
         initDiamondSystem();
@@ -1681,7 +1689,7 @@ console.log('✅ تم تحميل جميع معالجات الأخطاء بنجا
 // 🌙 1. نظام تبديل النمط المظلم/الفاتح (Dark Mode)
 class ThemeManager {
     constructor() {
-        this.darkModeKey = '5a-dark-mode';
+        this.darkModeKey = STORAGE_KEY + '-theme';
         this.prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
         this.init();
     }
@@ -1745,7 +1753,7 @@ class ThemeManager {
 class ShotHistory {
     constructor(maxItems = 15) {
         this.maxItems = maxItems;
-        this.historyKey = '5a-shot-history';
+        this.historyKey = STORAGE_KEY + '-history';
         this.history = this.loadHistory();
     }
     
@@ -1839,7 +1847,7 @@ class ShotHistory {
 // ⭐ 3. نظام المفضلة
 class FavoritesManager {
     constructor() {
-        this.favoritesKey = '5a-favorites';
+        this.favoritesKey = STORAGE_KEY + '-favorites';
         this.favorites = this.loadFavorites();
     }
     
